@@ -25,9 +25,7 @@ public class MainActivity extends Activity {
         requestWindowFeature(Window.FEATURE_NO_TITLE);
         setContentView(R.layout.activity_main);
 
-        // Register mMessageReceiver to receive messages.
-//        LocalBroadcastManager.getInstance(this).registerReceiver(mMessageReceiver,
-//                new IntentFilter(LOG_OUT));
+        Intent intent = getIntent();
     }
 
     public void signUpClick(View view){

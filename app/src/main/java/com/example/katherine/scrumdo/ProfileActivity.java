@@ -62,11 +62,9 @@ public class ProfileActivity extends Activity {
         return BitmapFactory.decodeByteArray(image, 0, image.length);
     }
 
-    public void logOutClock(View view){
-        //do this on logout button click
-        final String LOG_OUT = "event_logout";
-        Intent intent = new Intent(LOG_OUT);
-        //send the broadcast to all activities who are listening
-        LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
+    public void logOutClick(View view){
+        Intent intent = new Intent(this, MainActivity.class);
+        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        startActivity(intent);
     }
 }
