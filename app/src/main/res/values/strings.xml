@@ -1,0 +1,17 @@
+<resources>
+    <string name="app_name">Scrum Do</string>
+
+    <string name="signUp">Sign Up</string>
+    <string name="signIn">Sign In</string>
+    <string name="uHint">Username</string>
+    <string name="pHint">Password</string>
+
+    <string name="uploadBtn">Choose Image</string>
+    <string name="doneBtn">DONE</string>
+    <string name="fnameHint">First Name</string>
+    <string name="lnameHint">Last Name</string>
+    <string name="cpwdHint">Confirm Password</string>
+
+    <string name="fileName">No image</string>
+    <string name="logOut">Log Out</string>
+</resources>

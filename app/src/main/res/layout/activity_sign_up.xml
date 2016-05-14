@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:paddingBottom="@dimen/activity_vertical_margin"
+    android:paddingLeft="@dimen/activity_horizontal_margin"
+    android:paddingRight="@dimen/activity_horizontal_margin"
+    android:paddingTop="@dimen/activity_vertical_margin"
+    android:orientation="vertical"
+    tools:context="com.example.katherine.scrumdo.SignUpActivity">
+
+    <ImageView
+        android:layout_width="fill_parent"
+        android:layout_height="100dp"
+        android:id="@+id/imageView2"
+        android:layout_gravity="center_horizontal" />
+
+    <EditText
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/fname"
+        android:layout_gravity="center_horizontal"
+        android:gravity="center_horizontal"
+        android:hint="@string/fnameHint" />
+
+    <EditText
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/lname"
+        android:layout_gravity="center_horizontal"
+        android:gravity="center_horizontal"
+        android:hint="@string/lnameHint" />
+
+    <EditText
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/uname"
+        android:layout_gravity="center_horizontal"
+        android:gravity="center_horizontal"
+        android:hint="@string/uHint" />
+
+    <EditText
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:inputType="textPassword"
+        android:ems="10"
+        android:id="@+id/password"
+        android:layout_gravity="center_horizontal"
+        android:hint="@string/pHint"
+        android:gravity="center_horizontal" />
+
+    <EditText
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:inputType="textPassword"
+        android:ems="10"
+        android:id="@+id/confirmPassword"
+        android:layout_gravity="center_horizontal"
+        android:hint="@string/cpwdHint"
+        android:gravity="center_horizontal" />
+
+    <LinearLayout
+        android:orientation="horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <Button
+            style="?android:attr/buttonStyleSmall"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/uploadBtn"
+            android:id="@+id/button4"
+            android:layout_weight="1"
+            android:onClick="chooseImage" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/fileName"
+            android:id="@+id/textView"
+            android:layout_weight="5"
+            android:gravity="center_horizontal" />
+
+    </LinearLayout>
+
+    <Button
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/doneBtn"
+        android:id="@+id/button3"
+        android:layout_gravity="center_horizontal"
+        android:onClick="doneClick" />
+</LinearLayout>
