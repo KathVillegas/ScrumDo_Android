@@ -14,4 +14,7 @@
 
     <string name="fileName">No image</string>
     <string name="logOut">Log Out</string>
+
+    <string name="projNameHint">Project Name</string>
+    <string name="dueDateHint">Due Date</string>
 </resources>

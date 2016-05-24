@@ -10,6 +10,8 @@ import android.net.Uri;
 import android.provider.MediaStore;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.View;
 import android.view.Window;
 import android.widget.EditText;
@@ -33,7 +35,8 @@ public class SignUpActivity extends Activity {
         Intent intent = getIntent();
 
     }
-    public void chooseImage(View view){
+
+    public void chooseImage(View view) {
 
         startActivityForResult(new Intent(Intent.ACTION_PICK, android.provider.MediaStore.Images.Media.INTERNAL_CONTENT_URI), GET_FROM_GALLERY);
     }
@@ -43,7 +46,7 @@ public class SignUpActivity extends Activity {
         super.onActivityResult(requestCode, resultCode, data);
 
         //Detects request codes
-        if(requestCode==GET_FROM_GALLERY && resultCode == Activity.RESULT_OK) {
+        if (requestCode == GET_FROM_GALLERY && resultCode == Activity.RESULT_OK) {
             Uri selectedImage = data.getData();
 
             try {
@@ -58,50 +61,43 @@ public class SignUpActivity extends Activity {
             }
         }
     }
+
     // convert from bitmap to byte array
     public static byte[] getBytes(Bitmap bitmap) {
         ByteArrayOutputStream stream = new ByteArrayOutputStream();
         bitmap.compress(Bitmap.CompressFormat.PNG, 0, stream);
         return stream.toByteArray();
     }
-    public void doneClick(View view){
-        EditText fname = (EditText)findViewById(R.id.fname);
-        EditText lname = (EditText)findViewById(R.id.lname);
-        EditText uname = (EditText)findViewById(R.id.uname);
-        EditText pwd = (EditText)findViewById(R.id.password);
-        EditText cpwd = (EditText)findViewById(R.id.confirmPassword);
+
+    public void doneClick(View view) {
+        final EditText fname = (EditText) findViewById(R.id.fname);
+        final EditText lname = (EditText) findViewById(R.id.lname);
+        final EditText uname = (EditText) findViewById(R.id.uname);
+        final EditText pwd = (EditText) findViewById(R.id.password);
+        EditText cpwd = (EditText) findViewById(R.id.confirmPassword);
 
         String Fname = fname.getText().toString();
         String Lname = lname.getText().toString();
         String Uname = uname.getText().toString();
         String Pass = pwd.getText().toString();
 
-        if(!pwd.getText().toString().equals(cpwd.getText().toString())){
-            Toast toast = Toast.makeText(this, "Password did not match", Toast.LENGTH_LONG);
-            toast.show();
-        }else if(Fname.length() == 0){
-            Toast toast = Toast.makeText(this, "Enter your First Name", Toast.LENGTH_LONG);
-            toast.show();
-        }else if(Lname.length() == 0){
-            Toast toast = Toast.makeText(this, "Enter your Last Name", Toast.LENGTH_LONG);
-            toast.show();
-        }
-        else if(Uname.length() == 0){
-            Toast toast = Toast.makeText(this, "Enter your Username", Toast.LENGTH_LONG);
-            toast.show();
-        }
-        else if(Pass.length() == 0){
-            Toast toast = Toast.makeText(this, "Enter your Password", Toast.LENGTH_LONG);
-            toast.show();
-        }
-        else if(bitmap == null){
+        if (!pwd.getText().toString().equals(cpwd.getText().toString())) {
+            cpwd.setError("Did not match the password!");
+        } else if (Fname.length() == 0) {
+            fname.setError("Enter your First Name!");
+        } else if (Lname.length() == 0) {
+            lname.setError("Enter your Last Name!");
+        } else if (Uname.length() == 0) {
+            uname.setError("Enter your User Name!");
+        } else if (Pass.length() == 0) {
+            pwd.setError("Enter your Password!");
+        } else if (bitmap == null) {
             Toast toast = Toast.makeText(this, "Choose an image", Toast.LENGTH_LONG);
             toast.show();
-        }
-        else{
+        } else {
             byte[] image = getBytes(bitmap);
 
-            try{
+            try {
                 SQLiteOpenHelper scrumDoDatabaseHelper = new ScrumDoDatabaseHelper(this);
                 db = scrumDoDatabaseHelper.getWritableDatabase();
                 long id = ScrumDoDatabaseHelper.insertUsers(db, Fname, Lname, Uname, Pass, image);
@@ -111,9 +107,48 @@ public class SignUpActivity extends Activity {
                 intent.putExtra("userId", id);
                 startActivity(intent);
 
-            }catch (SQLiteException e){}
+            } catch (SQLiteException e) {
+            }
 
         }
+
+        fname.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                fname.setError(null);
+            }
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+            @Override
+            public void afterTextChanged(Editable s) {}    });
+        lname.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                lname.setError(null);
+            }
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+            @Override
+            public void afterTextChanged(Editable s) {}    });
+        uname.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                uname.setError(null);
+            }
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+            @Override
+            public void afterTextChanged(Editable s) {}    });
+        pwd.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                pwd.setError(null);
+            }
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+            @Override
+            public void afterTextChanged(Editable s) {}    });
+
 
     }
 }

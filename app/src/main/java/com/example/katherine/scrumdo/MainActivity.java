@@ -11,6 +11,8 @@ import android.database.sqlite.SQLiteOpenHelper;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.View;
 import android.view.Window;
 import android.widget.EditText;
@@ -35,8 +37,8 @@ public class MainActivity extends Activity {
     }
 
     public void signInClick(View view){
-        EditText uname = (EditText)findViewById(R.id.uname);
-        EditText password = (EditText)findViewById(R.id.password);
+        final EditText uname = (EditText)findViewById(R.id.uname);
+        final EditText password = (EditText)findViewById(R.id.password);
 
         try{
             SQLiteOpenHelper scrumDoDatabaseHelper = new ScrumDoDatabaseHelper(this);
@@ -54,16 +56,36 @@ public class MainActivity extends Activity {
                     intent.putExtra("userId", cursor.getLong(0));
                     startActivity(intent);
                 }else{
-                    Toast toast = Toast.makeText(this, "Wrong Password!", Toast.LENGTH_LONG);
-                    toast.show();
+                    password.setError("Wrong password!");
                 }
             }else{
-                Toast toast = Toast.makeText(this, "User Not Found", Toast.LENGTH_LONG);
-                toast.show();
+                uname.setError("User not found!");
             }
         }catch(SQLiteException e) {}
 
+        password.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                password.setError(null);
+            }
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+            @Override
+            public void afterTextChanged(Editable s) {}    });
+        uname.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                uname.setError(null);
+            }
 
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+            }
+        });
     }
 
 
