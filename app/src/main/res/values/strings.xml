@@ -26,4 +26,11 @@
     <string name="viewMembers">Members</string>
     <string name="myProjects">My Projects</string>
 
+    <string name="deleteMember">Delete Members</string>
+    <string name="addMember">Add Members</string>
+
+    <string name="assignMember">Assign Member</string>
+    <string name="taskName">Task Name</string>
+    <string name="taskDetail">Description</string>
+
 </resources>

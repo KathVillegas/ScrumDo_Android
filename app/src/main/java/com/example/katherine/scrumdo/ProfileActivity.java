@@ -161,8 +161,8 @@ public class ProfileActivity extends Activity {
                     try {
                         SQLiteOpenHelper scrumDoDatabaseHelper = new ScrumDoDatabaseHelper(ProfileActivity.this);
                         db = scrumDoDatabaseHelper.getWritableDatabase();
-
                         projId = ScrumDoDatabaseHelper.insertProject(db, u_Id, ProjectName, dueDate);
+                        populateProjectView();
                         addMembers();
                         alert.dismiss();
                     } catch (SQLiteException e){}
@@ -230,7 +230,7 @@ public class ProfileActivity extends Activity {
                             for(int i=0; i< seletedItems.size(); i++ ){
                                 SQLiteDatabase db2 = scrumDoDatabaseHelper.getReadableDatabase();
 
-                                cursor = db2.query("USERS", new String[]{"FNAME", "LNAME", "UNAME", "PASSWORD", "IMAGE"},
+                                cursor = db2.query("USERS", new String[]{"_id", "FNAME", "LNAME", "UNAME", "PASSWORD", "IMAGE"},
                                         "UNAME =?", new String[] {seletedItems.get(i).toString()},
                                         null, null, null);
 
@@ -254,6 +254,7 @@ public class ProfileActivity extends Activity {
                     .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialog, int id) {
+                            populateProjectView();
                             Intent intent = new Intent(ProfileActivity.this, ProjectActivity.class);
                             intent.putExtra("userId", userId);
                             intent.putExtra("projectId", projId);
@@ -277,7 +278,10 @@ public class ProfileActivity extends Activity {
 
     // Populate the Project View.
     public void populateProjectView(){
-        cursor = db.query("PROJECTS", new String[] {"_id, ADMIN_ID", "PROJECT_NAME"},
+        SQLiteOpenHelper scrumDoDatabaseHelper = new ScrumDoDatabaseHelper(this);
+        db = scrumDoDatabaseHelper.getReadableDatabase();
+
+        cursor = db.query("PROJECTS", new String[] {"_id", "ADMIN_ID", "PROJECT_NAME"},
                 "ADMIN_ID = ?", new String [] {Long.toString(userId)},
                 null, null, null);
 
@@ -304,6 +308,7 @@ public class ProfileActivity extends Activity {
                             Intent intent = new Intent(ProfileActivity.this, ProjectActivity.class);
                             intent.putExtra("projectId",clickedProjId);
                             intent.putExtra("projectName",clickedProjName);
+                            intent.putExtra("userId", userId);
                             startActivity(intent);
                         }
                     };

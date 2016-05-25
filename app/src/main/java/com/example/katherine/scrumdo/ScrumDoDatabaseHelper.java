@@ -20,12 +20,12 @@ public class ScrumDoDatabaseHelper extends SQLiteOpenHelper {
     @Override
     public void onCreate(SQLiteDatabase db){
         db.execSQL("CREATE TABLE USERS ("
-                + "_id INTEGER PRIMARY KEY AUTOINCREMENT,"
-                + "FNAME TEXT,"
-                + "LNAME TEXT,"
-                + "UNAME TEXT,"
-                + "PASSWORD TEXT,"
-                + "IMAGE BLOB);"
+                        + "_id INTEGER PRIMARY KEY AUTOINCREMENT,"
+                        + "FNAME TEXT,"
+                        + "LNAME TEXT,"
+                        + "UNAME TEXT,"
+                        + "PASSWORD TEXT,"
+                        + "IMAGE BLOB);"
         );
 
         db.execSQL("CREATE TABLE PROJECTS ("
@@ -40,7 +40,8 @@ public class ScrumDoDatabaseHelper extends SQLiteOpenHelper {
                         + "_id INTEGER PRIMARY KEY AUTOINCREMENT,"
                         + "PROJECT_ID INTEGER,"
                         + "TASK_NAME TEXT,"
-                        + "DUE_DATE NUMERIC,"
+                        + "TASK_DETAILS TEXT,"
+                        + "DUE_DATE TEXT,"
                         + "ASSIGNED_USER_ID INTEGER,"
                         + "LINK TEXT,"
                         + "STATUS TEXT);"
@@ -86,11 +87,16 @@ public class ScrumDoDatabaseHelper extends SQLiteOpenHelper {
         db.insert("MEMBERS", null, memberValues);
     }
 
-    public static Cursor getProjectNames(SQLiteDatabase db, long userId){
-        return db.query("PROJECTS", new String[] {"PROJECT_NAME"},
-                "ADMIN_ID = ?", new String[] {Long.toString(userId)} , null, null, null);
+    public static void insertTask(SQLiteDatabase db, int projId, String taskName,String taskDetail, String dueDate, int assignUser){
+        ContentValues taskValues = new ContentValues();
+        taskValues.put("PROJECT_ID", projId);
+        taskValues.put("TASK_NAME", taskName);
+        taskValues.put("TASK_DETAILS", taskDetail);
+        taskValues.put("DUE_DATE", dueDate);
+        taskValues.put("ASSIGNED_USER_ID", assignUser);
+        taskValues.put("STATUS", "todo");
+        db.insert("MEMBERS", null, taskValues);
     }
-
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldversion, int newversion){
