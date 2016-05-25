@@ -12,6 +12,8 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.support.design.widget.FloatingActionButton;
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.Window;
@@ -22,18 +24,20 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 
 public class ProfileActivity extends Activity {
     private SQLiteDatabase db;
-    public static String ProjectName = null;
+    public static String ProjectName;
     public static int month;
     public static int day;
     public static int year;
-    public  TextView fname;
-    public  TextView lname;
-    public  TextView uname;
     public  TextView password;
+    public long projId;
+    public long userId;
+    public String user;
 
 
     @Override
@@ -46,15 +50,12 @@ public class ProfileActivity extends Activity {
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-//                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-//                        .setAction("Action", null).show();
                 showAddProject();
-
             }
         });
 
         Intent intent = getIntent();
-        long userId = (Long) getIntent().getExtras().get("userId");
+        userId = (Long) getIntent().getExtras().get("userId");
 
         try{
             SQLiteOpenHelper scrumDoDatabaseHelper = new ScrumDoDatabaseHelper(this);
@@ -62,19 +63,20 @@ public class ProfileActivity extends Activity {
 
             Cursor cursor = db.query("USERS", new String[]{"FNAME", "LNAME", "UNAME", "PASSWORD", "IMAGE"},
                     "_id = ?",
-                    new String[] {Long.toString(userId)},
+                    new String[]{Long.toString(userId)},
                     null, null, null);
 
             if(cursor.moveToFirst()){
-                 fname = (TextView)findViewById(R.id.fname);
-                 lname = (TextView)findViewById(R.id.lname);
-                 uname = (TextView)findViewById(R.id.uname);
-                 password = (TextView)findViewById(R.id.password);
+                TextView fname = (TextView)findViewById(R.id.fname);
+                TextView lname = (TextView)findViewById(R.id.lname);
+                TextView uname = (TextView)findViewById(R.id.uname);
+                TextView password = (TextView)findViewById(R.id.password);
                 ImageView profileImage = (ImageView)findViewById(R.id.profileImage);
 
                 fname.setText(cursor.getString(0));
                 lname.setText(cursor.getString(1));
                 uname.setText(cursor.getString(2));
+                user = cursor.getString(2);
                 password.setText(cursor.getString(3));
                 byte[] image = cursor.getBlob(4);
 
@@ -133,66 +135,122 @@ public class ProfileActivity extends Activity {
                 month = dueDate.getMonth() + 1;
                 day = dueDate.getDayOfMonth();
                 year = dueDate.getYear();
+                String dueDate = month + "-" + day + "-" + year;
 
                 if (ProjectName.length() == 0) {
                     projName.setError("Enter project name!");
                 } else {
-                    fname.setText(ProjectName);
-                    lname.setText(String.valueOf(month));
-                    uname.setText(String.valueOf(day));
-                    password.setText(String.valueOf(year));
+
+                    int u_Id = (int) userId;
 
                     //Saving to database
+                    try {
+                        SQLiteOpenHelper scrumDoDatabaseHelper = new ScrumDoDatabaseHelper(ProfileActivity.this);
+                        SQLiteDatabase db = scrumDoDatabaseHelper.getWritableDatabase();
 
-                    addMembers();
-                    alert.dismiss();
+                        projId = ScrumDoDatabaseHelper.insertProject(db, u_Id, ProjectName, dueDate);
+                        addMembers();
+                        alert.dismiss();
+                    } catch (SQLiteException e){}
+
                 }
+            }
+        });
+
+        projName.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                projName.setError(null);
+            }
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+            }
+            @Override
+            public void afterTextChanged(Editable s) {
             }
         });
     }
 
+
+
     public void addMembers(){
-        final CharSequence[] items = {" Easy "," Medium "," Hard "," Very Hard "};
-        // arraylist to keep the selected items
-        final ArrayList seletedItems=new ArrayList();
+        try {
+            SQLiteOpenHelper scrumDoDatabaseHelper = new ScrumDoDatabaseHelper(ProfileActivity.this);
+            SQLiteDatabase db = scrumDoDatabaseHelper.getReadableDatabase();
 
-        final AlertDialog.Builder builderDialog = new AlertDialog.Builder(ProfileActivity.this);
-        builderDialog.setTitle("Add Members");
-        builderDialog.setMultiChoiceItems(items, null,
-                new DialogInterface.OnMultiChoiceClickListener() {
-                    // indexSelected contains the index of item (of which checkbox checked)
-                    @Override
-                    public void onClick(DialogInterface dialog, int indexSelected,
-                                        boolean isChecked) {
-                        if (isChecked) {
-                            // If the user checked the item, add it to the selected items
-                            // write your code when user checked the checkbox
-                            seletedItems.add(indexSelected);
-                        } else if (seletedItems.contains(indexSelected)) {
-                            // Else, if the item is already in the array, remove it
-                            // write your code when user Uchecked the checkbox
-                            seletedItems.remove(Integer.valueOf(indexSelected));
+            final ArrayList seletedItems = new ArrayList();
+            Cursor cursor = db.query("USERS", new String[]{"FNAME", "LNAME", "UNAME", "PASSWORD", "IMAGE"},
+                     null, null,
+                    null, null, null);
+            final ArrayList<String> UserList = new ArrayList<String>();
+            cursor.moveToFirst();
+                do{
+                    if(!user.equals(cursor.getString(2))){
+                        UserList.add(cursor.getString(2));
+                    }
+                }while(cursor.moveToNext());
+
+            final CharSequence[] items = UserList.toArray(new CharSequence[UserList.size()]);
+            final AlertDialog.Builder builderDialog = new AlertDialog.Builder(ProfileActivity.this);
+            builderDialog.setTitle("Add Members");
+            builderDialog.setMultiChoiceItems(items, null,
+                    new DialogInterface.OnMultiChoiceClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int indexSelected,
+                                            boolean isChecked) {
+                            if (isChecked) {
+                                seletedItems.add(items[indexSelected]);
+                            } else if (seletedItems.contains(items[indexSelected])) {
+                                seletedItems.remove(Integer.valueOf(indexSelected));
+                            }
                         }
-                    }
-                })
-                // Set the action buttons
-                .setPositiveButton("OK", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int id) {
-                        //  Your code when user clicked on OK
-                        //  You can write the code  to save the selected item here
+                    })
 
-                    }
-                })
-                .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int id) {
-                        //  Your code when user clicked on Cancel
+                    .setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int id) {
+                            //saving members to database
+                            SQLiteOpenHelper scrumDoDatabaseHelper = new ScrumDoDatabaseHelper(ProfileActivity.this);
+                            SQLiteDatabase db = scrumDoDatabaseHelper.getWritableDatabase();
 
-                    }
-                });
+                            for(int i=0; i< seletedItems.size(); i++ ){
+                                SQLiteDatabase db2 = scrumDoDatabaseHelper.getReadableDatabase();
 
-        AlertDialog dialog = builderDialog.create();
-        dialog.show();
+                                Cursor cursor = db2.query("USERS", new String[]{"FNAME", "LNAME", "UNAME", "PASSWORD", "IMAGE"},
+                                        "UNAME =?", new String[] {seletedItems.get(i).toString()},
+                                        null, null, null);
+
+                                if(cursor.moveToFirst()){
+                                    long memId = cursor.getLong(0);
+                                    int proj_id = (int) projId;
+                                    int mem_id = (int) memId;
+                                    ScrumDoDatabaseHelper.insertMembers(db, proj_id, mem_id);
+                                    Toast toast = Toast.makeText(ProfileActivity.this, "Success", Toast.LENGTH_LONG);
+                                    toast.show();
+                                }
+
+                            }
+
+                            Intent intent = new Intent(ProfileActivity.this, ProjectActivity.class);
+                            intent.putExtra("userId", userId);
+                            intent.putExtra("projectId", projId);
+                            intent.putExtra("projectName", ProjectName);
+                            startActivity(intent);
+                        }
+                    })
+                    .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int id) {
+                            Intent intent = new Intent(ProfileActivity.this, ProjectActivity.class);
+                            intent.putExtra("userId", userId);
+                            intent.putExtra("projectId", projId);
+                            intent.putExtra("projectName", ProjectName);
+                            startActivity(intent);
+                        }
+                    });
+
+            AlertDialog dialog = builderDialog.create();
+            dialog.show();
+        }catch (SQLiteException e){}
     }
 }

@@ -31,7 +31,7 @@ public class ScrumDoDatabaseHelper extends SQLiteOpenHelper {
                         + "_id INTEGER PRIMARY KEY AUTOINCREMENT,"
                         + "ADMIN_ID INTEGER,"
                         + "PROJECT_NAME TEXT,"
-                        + "DUE_DATE NUMERIC,"
+                        + "DUE_DATE TEXT,"
                         + "STATUS TEXT);"
         );
 
@@ -69,15 +69,23 @@ public class ScrumDoDatabaseHelper extends SQLiteOpenHelper {
         return db.insert("USERS", null, userValues);
     }
 
-    public static long insertUsers(SQLiteDatabase db, String fname, String lname, String uname, String pwd, byte[] image){
-        ContentValues userValues = new ContentValues();
-        userValues.put("FNAME", fname);
-        userValues.put("LNAME", lname);
-        userValues.put("UNAME", uname);
-        userValues.put("PASSWORD", pwd);
-        userValues.put("IMAGE", image);
-        return db.insert("USERS", null, userValues);
+    public static long insertProject(SQLiteDatabase db, int adminId, String projName, String dueDate){
+        ContentValues projectValues = new ContentValues();
+        projectValues.put("ADMIN_ID", adminId);
+        projectValues.put("PROJECT_NAME", projName);
+        projectValues.put("DUE_DATE", dueDate);
+        projectValues.put("STATUS", "ongoing");
+        return db.insert("PROJECTS", null, projectValues);
     }
+
+    public static void insertMembers(SQLiteDatabase db, int projId, int memberId){
+        ContentValues memberValues = new ContentValues();
+        memberValues.put("PROJECT_ID", projId);
+        memberValues.put("MEMBER_ID", memberId);
+        db.insert("MEMBERS", null, memberValues);
+    }
+
+
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldversion, int newversion){
