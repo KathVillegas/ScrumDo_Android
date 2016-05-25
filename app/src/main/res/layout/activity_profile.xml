@@ -14,14 +14,14 @@
 
     <LinearLayout
         android:orientation="horizontal"
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="0.98">
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_weight="0">
 
         <LinearLayout
             android:orientation="vertical"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
             android:layout_weight="1">
 
             <TextView
@@ -73,22 +73,45 @@
 
     </LinearLayout>
 
-    <Button
-        style="?android:attr/buttonStyleSmall"
+    <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="@string/logOut"
-        android:id="@+id/logout"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:text="@string/myProjects"
+        android:id="@+id/textView2"
         android:layout_gravity="center_horizontal"
-        android:onClick="logOutClick" />
+        android:layout_weight="0" />
 
-    <android.support.design.widget.FloatingActionButton
-        android:id="@+id/fab"
-        android:layout_width="wrap_content"
+    <ListView
+        android:layout_width="match_parent"
+        android:layout_height="186dp"
+        android:id="@+id/projectView"
+        android:layout_gravity="center_horizontal" />
+
+    <LinearLayout
+        android:orientation="horizontal"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_margin="@dimen/fab_margin"
-        android:src="@android:drawable/ic_input_add"
-        android:layout_gravity="end" />
+        android:layout_gravity="center_vertical">
+
+        <android.support.design.widget.FloatingActionButton
+            android:id="@+id/fab"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="@dimen/fab_margin"
+            android:src="@android:drawable/ic_input_add"
+            android:layout_gravity="end" />
+
+        <Button
+            style="?android:attr/buttonStyleSmall"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/logOut"
+            android:id="@+id/logout"
+            android:onClick="logOutClick"
+            android:layout_gravity="center"
+            android:layout_weight="2" />
+    </LinearLayout>
 
 
 </LinearLayout>

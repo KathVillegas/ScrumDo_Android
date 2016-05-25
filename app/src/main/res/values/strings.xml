@@ -17,4 +17,13 @@
 
     <string name="projNameHint">Project Name</string>
     <string name="dueDateHint">Due Date</string>
+
+    <string name="toDoLabel">TO DO</string>
+    <string name="doingLabel">DOING</string>
+    <string name="doneLabel">DONE</string>
+
+    <string name="newTask">Add Task</string>
+    <string name="viewMembers">Members</string>
+    <string name="myProjects">My Projects</string>
+
 </resources>

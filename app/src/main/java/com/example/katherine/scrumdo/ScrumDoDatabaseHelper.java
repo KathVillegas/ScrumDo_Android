@@ -2,6 +2,7 @@ package com.example.katherine.scrumdo;
 
 import android.content.ContentValues;
 import android.content.Context;
+import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 
@@ -85,6 +86,10 @@ public class ScrumDoDatabaseHelper extends SQLiteOpenHelper {
         db.insert("MEMBERS", null, memberValues);
     }
 
+    public static Cursor getProjectNames(SQLiteDatabase db, long userId){
+        return db.query("PROJECTS", new String[] {"PROJECT_NAME"},
+                "ADMIN_ID = ?", new String[] {Long.toString(userId)} , null, null, null);
+    }
 
 
     @Override
