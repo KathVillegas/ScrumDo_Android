@@ -18,6 +18,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.Window;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.LinearLayout;
@@ -45,14 +46,6 @@ public class ProjectActivity extends Activity {
         requestWindowFeature(Window.FEATURE_NO_TITLE);
         setContentView(R.layout.activity_project);
 
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.deleteProject);
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                deleteProject();
-            }
-        });
-
         Intent intent = getIntent();
         projectId = (Long) intent.getExtras().get("projectId");
         projectName = (String) intent.getExtras().get("projectName");
@@ -61,6 +54,35 @@ public class ProjectActivity extends Activity {
         final TextView projName = (TextView)findViewById(R.id.projectName);
         projName.setText(projectName);
         populateTaskView();
+
+        SQLiteOpenHelper scrumDoDatabaseHelper = new ScrumDoDatabaseHelper(ProjectActivity.this);
+        SQLiteDatabase db2 = scrumDoDatabaseHelper.getReadableDatabase();
+
+        cursor = db2.query("PROJECTS", new String[]{"_id", "ADMIN_ID"},
+                "_id =?", new String[] {Long.toString(projectId)},
+                null, null, null);
+        cursor.moveToFirst();
+
+        if(cursor.getLong(1) != userId) {
+            Button addTask = (Button)findViewById(R.id.addTask);
+            Button viewMembers = (Button) findViewById(R.id.viewMem);
+            FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.deleteProject);
+
+            addTask.setVisibility(View.GONE);
+            viewMembers.setVisibility(View.GONE);
+            fab.setVisibility(View.GONE);
+        }
+        else{
+            FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.deleteProject);
+            fab.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    deleteProject();
+                }
+            });
+        }
+
+
     }
 
     public void deleteProject(){

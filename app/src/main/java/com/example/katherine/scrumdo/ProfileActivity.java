@@ -334,18 +334,24 @@ public class ProfileActivity extends Activity {
             }while(cursor.moveToNext());
         }
 
-        cursor = db.query("PROJECTS", new String[] {"_id", "ADMIN_ID", "PROJECT_NAME"},
-                "ADMIN_ID = ?", new String [] {Long.toString(userId)},
+        cursor = db.query("MEMBERS", new String[] {"_id", "PROJECT_ID"},
+                "MEMBER_ID = ?", new String [] {Long.toString(userId)},
                 null, null, null);
-
-        ListView projectList = (ListView)findViewById(R.id.projectView);
-        final ArrayList<String> projNameList = new ArrayList<String>();
-        final ArrayList<Long> projIdList = new ArrayList<Long>();
 
         if(cursor.moveToFirst()){
             do {
-                projIdList.add(cursor.getLong(0));
-                projNameList.add(cursor.getString(2));
+                projIdList.add(cursor.getLong(1));
+
+                Cursor cursor2 = db.query("PROJECTS", new String[] {"_id", "PROJECT_NAME"},
+                        "_id = ?", new String [] {Long.toString(cursor.getLong(1))},
+                        null, null, null);
+
+                if(cursor2.moveToFirst()){
+                    do {
+                        projNameList.add(cursor2.getString(1));
+                    }while(cursor2.moveToNext());
+                }
+
             }while(cursor.moveToNext());
         }
 
