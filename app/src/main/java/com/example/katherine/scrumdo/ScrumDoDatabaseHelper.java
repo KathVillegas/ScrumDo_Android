@@ -98,6 +98,16 @@ public class ScrumDoDatabaseHelper extends SQLiteOpenHelper {
         db.insert("TASKS", null, taskValues);
     }
 
+    public static void insertComment(SQLiteDatabase db, int taskId, int userId, String comment){
+        ContentValues taskValues = new ContentValues();
+        taskValues.put("TASK_ID", taskId);
+        taskValues.put("USER_ID", userId);
+        taskValues.put("COMMENT", comment);
+        db.insert("COMMENTS", null, taskValues);
+    }
+
+
+
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldversion, int newversion){
 

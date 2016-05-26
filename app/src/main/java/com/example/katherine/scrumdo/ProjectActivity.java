@@ -102,28 +102,31 @@ public class ProjectActivity extends Activity {
                             cursor = db2.query("TASKS", new String[]{"_id"},
                                     "PROJECT_ID =?", new String[] {Long.toString(projectId)},
                                     null, null, null);
-                            cursor.moveToFirst();
-                            do {
-                                db.delete("TASKS",
-                                        "_id=?",
-                                        new String[]{cursor.getString(0)}
-                                );
-                                Toast toast = Toast.makeText(ProjectActivity.this, "Delete Success", Toast.LENGTH_LONG);
-                                toast.show();
-                            }while(cursor.moveToNext());
+                            if(cursor.moveToFirst()) {
+                                do {
+                                    db.delete("TASKS",
+                                            "_id=?",
+                                            new String[]{cursor.getString(0)}
+                                    );
+                                    Toast toast = Toast.makeText(ProjectActivity.this, "Delete Success", Toast.LENGTH_LONG);
+                                    toast.show();
+                                } while (cursor.moveToNext());
+                            }
                             //delete member
                             cursor = db2.query("MEMBERS", new String[]{"_id"},
                                     "PROJECT_ID =?", new String[] {Long.toString(projectId)},
                                     null, null, null);
-                            cursor.moveToFirst();
-                            do {
-                                db.delete("MEMBERS",
-                                        "_id=?",
-                                        new String[]{cursor.getString(0)}
-                                );
-                                Toast toast = Toast.makeText(ProjectActivity.this, "Delete Success", Toast.LENGTH_LONG);
-                                toast.show();
-                            }while(cursor.moveToNext());
+
+                            if(cursor.moveToFirst()) {
+                                do {
+                                    db.delete("MEMBERS",
+                                            "_id=?",
+                                            new String[]{cursor.getString(0)}
+                                    );
+                                    Toast toast = Toast.makeText(ProjectActivity.this, "Delete Success", Toast.LENGTH_LONG);
+                                    toast.show();
+                                } while (cursor.moveToNext());
+                            }
 
                             //delete project
                             db.delete("PROJECTS",

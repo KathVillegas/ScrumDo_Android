@@ -28,48 +28,19 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="New Text"
-                android:id="@+id/password"
-                android:layout_below="@+id/uname"
-                android:layout_centerHorizontal="true"
-                android:textSize="15dp"
-                android:textIsSelectable="false" />
-
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="New Text"
-                android:id="@+id/fname"
-                android:layout_alignParentTop="true"
-                android:layout_centerHorizontal="true"
-                android:textSize="15dp"
-                android:textIsSelectable="false" />
-
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="New Text"
-                android:id="@+id/lname"
-                android:layout_below="@+id/fname"
-                android:layout_centerHorizontal="true"
-                android:textSize="15dp"
-                android:textIsSelectable="false" />
-
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="New Text"
                 android:id="@+id/uname"
                 android:layout_below="@+id/lname"
                 android:layout_centerHorizontal="true"
                 android:textSize="15dp"
-                android:textIsSelectable="false" />
-        </LinearLayout>
+                android:textIsSelectable="false"
+                android:gravity="center_horizontal" />
 
-        <ImageView
-            android:layout_width="fill_parent"
-            android:layout_height="100dp"
-            android:id="@+id/profileImage"
-            android:layout_weight="1" />
+            <ImageView
+                android:layout_width="fill_parent"
+                android:layout_height="100dp"
+                android:id="@+id/profileImage"
+                android:layout_weight="1" />
+        </LinearLayout>
 
     </LinearLayout>
 
@@ -84,7 +55,7 @@
 
     <ListView
         android:layout_width="match_parent"
-        android:layout_height="186dp"
+        android:layout_height="350dp"
         android:id="@+id/projectView"
         android:layout_gravity="center_horizontal" />
 
@@ -93,14 +64,6 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_gravity="center_vertical">
-
-        <android.support.design.widget.FloatingActionButton
-            android:id="@+id/fab"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_margin="@dimen/fab_margin"
-            android:src="@android:drawable/ic_input_add"
-            android:layout_gravity="end" />
 
         <Button
             style="?android:attr/buttonStyleSmall"
@@ -111,6 +74,13 @@
             android:onClick="logOutClick"
             android:layout_gravity="center"
             android:layout_weight="2" />
+
+        <android.support.design.widget.FloatingActionButton
+            android:id="@+id/fab"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="@dimen/fab_margin"
+            android:src="@android:drawable/ic_menu_add"/>
     </LinearLayout>
 
 

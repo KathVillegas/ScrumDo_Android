@@ -121,17 +121,11 @@ public class ProfileActivity extends Activity {
                     null, null, null);
 
             if (cursor.moveToFirst()) {
-                TextView fname = (TextView) findViewById(R.id.fname);
-                TextView lname = (TextView) findViewById(R.id.lname);
-                TextView uname = (TextView) findViewById(R.id.uname);
-                TextView password = (TextView) findViewById(R.id.password);
-                ImageView profileImage = (ImageView) findViewById(R.id.profileImage);
 
-                fname.setText(cursor.getString(0));
-                lname.setText(cursor.getString(1));
+                TextView uname = (TextView) findViewById(R.id.uname);
+                ImageView profileImage = (ImageView) findViewById(R.id.profileImage);
                 uname.setText(cursor.getString(2));
                 user = cursor.getString(2);
-                password.setText(cursor.getString(3));
                 byte[] image = cursor.getBlob(4);
 
                 Bitmap userImage = getImage(image);
