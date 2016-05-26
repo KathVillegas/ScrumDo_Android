@@ -76,7 +76,7 @@ public class ProjectActivity extends Activity {
                             SQLiteDatabase db2 = scrumDoDatabaseHelper.getReadableDatabase();
                             db = scrumDoDatabaseHelper.getWritableDatabase();
 
-//                            delete task
+                            //delete task
                             cursor = db2.query("TASKS", new String[]{"_id"},
                                     "PROJECT_ID =?", new String[] {Long.toString(projectId)},
                                     null, null, null);
