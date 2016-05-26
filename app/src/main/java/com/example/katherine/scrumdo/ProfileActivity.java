@@ -270,11 +270,11 @@ public class ProfileActivity extends Activity {
         }
     }
 
-    public void onListItemClick(ListView listView, long projId){
-        Intent intent = new Intent(ProfileActivity.this, ProjectActivity.class);
-        intent.putExtra("projectId", projId);
-        startActivity(intent);
-    }
+//    public void onListItemClick(ListView listView, long projId){
+//        Intent intent = new Intent(ProfileActivity.this, ProjectActivity.class);
+//        intent.putExtra("projectId", projId);
+//        startActivity(intent);
+//    }
 
     // Populate the Project View.
     public void populateProjectView(){

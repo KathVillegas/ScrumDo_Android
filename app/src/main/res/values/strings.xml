@@ -25,7 +25,7 @@
     <string name="newTask">Add Task</string>
     <string name="viewMembers">Members</string>
     <string name="myProjects">My Projects</string>
-
+    <string name="deleteProject">Delete Project</string>
     <string name="deleteMember">Delete Members</string>
     <string name="addMember">Add Members</string>
 

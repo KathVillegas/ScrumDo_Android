@@ -2,7 +2,6 @@ package com.example.katherine.scrumdo;
 
 import android.app.Activity;
 import android.app.AlertDialog;
-import android.app.ListActivity;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.database.Cursor;
@@ -17,13 +16,11 @@ import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.Window;
-import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
-import android.widget.CursorAdapter;
 import android.widget.DatePicker;
 import android.widget.EditText;
+import android.widget.LinearLayout;
 import android.widget.ListView;
-import android.widget.SimpleCursorAdapter;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -53,8 +50,9 @@ public class ProjectActivity extends Activity {
 
         final TextView projName = (TextView)findViewById(R.id.projectName);
         projName.setText(projectName);
+        populateTaskView();
+    }
 
-        }
     public void addAssignedUser(View view){
         memberIdList.clear();
         try {
@@ -142,7 +140,6 @@ public class ProjectActivity extends Activity {
             System.out.println(e.getMessage());
         }
     }
-
     public void addTask(View view){
 
         // get prompts.xml view
@@ -151,7 +148,6 @@ public class ProjectActivity extends Activity {
         AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(ProjectActivity.this);
         alertDialogBuilder.setView(promptView);
         alertDialogBuilder.setTitle("Add Task");
-
 
         final EditText TaskName = (EditText) promptView.findViewById(R.id.taskName);
         final EditText TaskDetail = (EditText) promptView.findViewById(R.id.taskDetail);
@@ -216,11 +212,9 @@ public class ProjectActivity extends Activity {
                 TaskName.setError(null);
             }
             @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-            }
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
             @Override
-            public void afterTextChanged(Editable s) {
-            }
+            public void afterTextChanged(Editable s) {}
         });
         TaskDetail.addTextChangedListener(new TextWatcher() {
             @Override
@@ -228,11 +222,9 @@ public class ProjectActivity extends Activity {
                 TaskDetail.setError(null);
             }
             @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-            }
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
             @Override
-            public void afterTextChanged(Editable s) {
-            }
+            public void afterTextChanged(Editable s) {}
         });
     }
     public void addMember(){
@@ -314,7 +306,6 @@ public class ProjectActivity extends Activity {
             System.out.println(e.getMessage());
         }
     }
-
     public void deleteMember(){
         try {
             SQLiteOpenHelper scrumDoDatabaseHelper = new ScrumDoDatabaseHelper(ProjectActivity.this);
@@ -371,7 +362,7 @@ public class ProjectActivity extends Activity {
                                     db = scrumDoDatabaseHelper.getWritableDatabase();
                                     db.delete("MEMBERS",
                                             "MEMBER_ID=? AND PROJECT_ID=?",
-                                            new String[] {cursor.getString(0), Long.toString(projectId)}
+                                            new String[]{cursor.getString(0), Long.toString(projectId)}
                                     );
                                     Toast toast = Toast.makeText(ProjectActivity.this, "Success", Toast.LENGTH_LONG);
                                     toast.show();
@@ -395,7 +386,6 @@ public class ProjectActivity extends Activity {
             System.out.println(e.getMessage());
         }
     }
-
     public void populateMemberView(View view){
         memberIdList.clear();
         LayoutInflater layoutInflater = LayoutInflater.from(ProjectActivity.this);
@@ -456,6 +446,66 @@ public class ProjectActivity extends Activity {
         // create an alert dialog
         final AlertDialog alert = alertDialogBuilder.create();
         alert.show();
+
+    }
+
+//    REATE TABLE TASKS ("
+//                               + "_id INTEGER PRIMARY KEY AUTOINCREMENT,"
+//                               + "PROJECT_ID INTEGER,"
+//                               + "TASK_NAME TEXT,"
+//                               + "TASK_DETAILS TEXT,"
+//                               + "DUE_DATE TEXT,"
+//                               + "ASSIGNED_USER_ID INTEGER,"
+//                               + "LINK TEXT,"
+//                               + "STATUS TEXT
+
+    //populate the TASKS VIEW
+    public void populateTaskView(){
+        SQLiteOpenHelper scrumDoDatabaseHelper = new ScrumDoDatabaseHelper(this);
+        db = scrumDoDatabaseHelper.getReadableDatabase();
+
+        cursor = db.query("TASKS", new String[]{"_id", "PROJECT_ID", "TASK_NAME"},
+                "PROJECT_ID = ?", new String[]{Long.toString(projectId)},
+                null, null, null);
+
+        int numberOfRows = cursor.getCount();
+        ArrayList<Long> taskIdList = new ArrayList<Long>();
+        LinearLayout toDoLinearLayout = (LinearLayout) findViewById(R.id.toDoLayoutId);
+        TextView[] taskViewArray = new TextView[numberOfRows];
+
+        if(cursor.moveToFirst()){
+            int i = 0;
+            do{
+                taskIdList.add(cursor.getLong(0));
+
+                TextView newTaskView = new TextView(this);
+                newTaskView.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT,
+                        LinearLayout.LayoutParams.WRAP_CONTENT));
+                newTaskView.setText(cursor.getString(2));
+                newTaskView.setBackgroundColor(0xff66ff66); // hex color 0xAARRGGBB
+                newTaskView.setPadding(20, 20, 20, 20);// in pixels (left, top, right, bottom)
+                newTaskView.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+
+
+                    }
+                });
+                toDoLinearLayout.addView(newTaskView);
+                taskViewArray[i] = newTaskView;
+                i++;
+            }while(cursor.moveToNext());
+        }else{
+            TextView newTaskView = new TextView(this);
+            newTaskView.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT,
+                    LinearLayout.LayoutParams.WRAP_CONTENT));
+            newTaskView.setText("not inserted");
+            newTaskView.setBackgroundColor(0xff66ff66); // hex color 0xAARRGGBB
+            newTaskView.setPadding(20, 20, 20, 20);// in pixels (left, top, right, bottom)
+            toDoLinearLayout.addView(newTaskView);
+        }
+
+
 
     }
 }

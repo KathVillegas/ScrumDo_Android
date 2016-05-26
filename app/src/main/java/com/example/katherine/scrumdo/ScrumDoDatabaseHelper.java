@@ -95,7 +95,7 @@ public class ScrumDoDatabaseHelper extends SQLiteOpenHelper {
         taskValues.put("DUE_DATE", dueDate);
         taskValues.put("ASSIGNED_USER_ID", assignUser);
         taskValues.put("STATUS", "todo");
-        db.insert("MEMBERS", null, taskValues);
+        db.insert("TASKS", null, taskValues);
     }
 
     @Override
