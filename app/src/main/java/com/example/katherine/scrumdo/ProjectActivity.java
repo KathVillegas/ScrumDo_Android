@@ -14,6 +14,7 @@ import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.Window;
 import android.widget.ArrayAdapter;
@@ -51,6 +52,15 @@ public class ProjectActivity extends Activity {
         final TextView projName = (TextView)findViewById(R.id.projectName);
         projName.setText(projectName);
         populateTaskView();
+        LinearLayout toDoLinearLayout = (LinearLayout)findViewById(R.id.toDoLayoutId);
+        LinearLayout doingLinearLayout = (LinearLayout)findViewById(R.id.doingLayoutId);
+        LinearLayout doneLinearLayout = (LinearLayout)findViewById(R.id.doneLayoutId);
+        toDoLinearLayout.setOnTouchListener(new TouchListener());
+        doingLinearLayout.setOnTouchListener(new TouchListener());
+        doneLinearLayout.setOnTouchListener(new TouchListener());
+        toDoLinearLayout.setOnDragListener(new DragListener());
+        doingLinearLayout.setOnDragListener(new DragListener());
+        doneLinearLayout.setOnDragListener(new DragListener());
     }
 
     public void addAssignedUser(View view){
@@ -198,6 +208,7 @@ public class ProjectActivity extends Activity {
                         db = scrumDoDatabaseHelper.getWritableDatabase();
                         ScrumDoDatabaseHelper.insertTask(db, p_Id, taskName, taskDetail, taskDueDate, a_User);
                         alert.dismiss();
+                        populateTaskView();
                         Toast toast = Toast.makeText(ProjectActivity.this, "Success.", Toast.LENGTH_LONG);
                         toast.show();
                     } catch (SQLiteException e){}
@@ -464,13 +475,16 @@ public class ProjectActivity extends Activity {
         SQLiteOpenHelper scrumDoDatabaseHelper = new ScrumDoDatabaseHelper(this);
         db = scrumDoDatabaseHelper.getReadableDatabase();
 
-        cursor = db.query("TASKS", new String[]{"_id", "PROJECT_ID", "TASK_NAME"},
+        cursor = db.query("TASKS", new String[]{"_id", "PROJECT_ID", "TASK_NAME", "STATUS"},
                 "PROJECT_ID = ?", new String[]{Long.toString(projectId)},
                 null, null, null);
 
         int numberOfRows = cursor.getCount();
         ArrayList<Long> taskIdList = new ArrayList<Long>();
         LinearLayout toDoLinearLayout = (LinearLayout) findViewById(R.id.toDoLayoutId);
+        LinearLayout doingLinearLayout = (LinearLayout)findViewById(R.id.doingLayoutId);
+        LinearLayout doneLinearLayout = (LinearLayout)findViewById(R.id.doneLayoutId);
+
         TextView[] taskViewArray = new TextView[numberOfRows];
 
         if(cursor.moveToFirst()){
@@ -484,6 +498,10 @@ public class ProjectActivity extends Activity {
                 newTaskView.setText(cursor.getString(2));
                 newTaskView.setBackgroundColor(0xff66ff66); // hex color 0xAARRGGBB
                 newTaskView.setPadding(20, 20, 20, 20);// in pixels (left, top, right, bottom)
+
+                newTaskView.setOnTouchListener(new TouchListener());
+                newTaskView.setOnDragListener(new DragListener());
+
                 newTaskView.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
@@ -491,7 +509,15 @@ public class ProjectActivity extends Activity {
 
                     }
                 });
-                toDoLinearLayout.addView(newTaskView);
+
+                if(cursor.getString(3).equals("todo")){
+                    toDoLinearLayout.addView(newTaskView);
+                }else if(cursor.getString(3).equals("doing")){
+                    doingLinearLayout.addView(newTaskView);
+                }else if(cursor.getString(3).equals("done")){
+                    doneLinearLayout.addView(newTaskView);
+                }
+
                 taskViewArray[i] = newTaskView;
                 i++;
             }while(cursor.moveToNext());
@@ -504,8 +530,5 @@ public class ProjectActivity extends Activity {
             newTaskView.setPadding(20, 20, 20, 20);// in pixels (left, top, right, bottom)
             toDoLinearLayout.addView(newTaskView);
         }
-
-
-
     }
 }
