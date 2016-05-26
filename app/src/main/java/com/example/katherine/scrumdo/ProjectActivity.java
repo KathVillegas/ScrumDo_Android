@@ -8,6 +8,7 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteException;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.provider.ContactsContract;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -18,6 +19,7 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.Window;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.LinearLayout;
@@ -34,6 +36,7 @@ public class ProjectActivity extends Activity {
 
     public String projectName;
     public long assignedUser = -1;
+    public String assignedname;
     public long projectId;
     public long userId;
     public final ArrayList<Long> memberIdList = new ArrayList<Long>();
@@ -52,6 +55,7 @@ public class ProjectActivity extends Activity {
         final TextView projName = (TextView)findViewById(R.id.projectName);
         projName.setText(projectName);
         populateTaskView();
+
         LinearLayout toDoLinearLayout = (LinearLayout)findViewById(R.id.toDoLayoutId);
         LinearLayout doingLinearLayout = (LinearLayout)findViewById(R.id.doingLayoutId);
         LinearLayout doneLinearLayout = (LinearLayout)findViewById(R.id.doneLayoutId);
@@ -61,6 +65,107 @@ public class ProjectActivity extends Activity {
         toDoLinearLayout.setOnDragListener(new DragListener());
         doingLinearLayout.setOnDragListener(new DragListener());
         doneLinearLayout.setOnDragListener(new DragListener());
+
+        SQLiteOpenHelper scrumDoDatabaseHelper = new ScrumDoDatabaseHelper(ProjectActivity.this);
+        SQLiteDatabase db2 = scrumDoDatabaseHelper.getReadableDatabase();
+
+        cursor = db2.query("PROJECTS", new String[]{"_id", "ADMIN_ID"},
+                "_id =?", new String[] {Long.toString(projectId)},
+                null, null, null);
+        cursor.moveToFirst();
+
+        if(cursor.getLong(1) != userId) {
+            Button addTask = (Button)findViewById(R.id.addTask);
+            Button viewMembers = (Button) findViewById(R.id.viewMem);
+            FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.deleteProject);
+
+            addTask.setVisibility(View.GONE);
+            viewMembers.setVisibility(View.GONE);
+            fab.setVisibility(View.GONE);
+        }
+        else{
+            FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.deleteProject);
+            fab.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    deleteProject();
+                }
+            });
+        }
+
+
+    }
+
+    public void deleteProject(){
+        try {
+            final AlertDialog.Builder builderDialog = new AlertDialog.Builder(ProjectActivity.this);
+            builderDialog.setTitle("Delete Project");
+            builderDialog.setMessage("Are you sure you want to delete the project?");
+            builderDialog
+                    .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int id) {
+                            SQLiteOpenHelper scrumDoDatabaseHelper = new ScrumDoDatabaseHelper(ProjectActivity.this);
+                            SQLiteDatabase db2 = scrumDoDatabaseHelper.getReadableDatabase();
+                            db = scrumDoDatabaseHelper.getWritableDatabase();
+
+                            //delete task
+                            cursor = db2.query("TASKS", new String[]{"_id"},
+                                    "PROJECT_ID =?", new String[] {Long.toString(projectId)},
+                                    null, null, null);
+                            if(cursor.moveToFirst()) {
+                                do {
+                                    db.delete("TASKS",
+                                            "_id=?",
+                                            new String[]{cursor.getString(0)}
+                                    );
+                                    Toast toast = Toast.makeText(ProjectActivity.this, "Delete Success", Toast.LENGTH_LONG);
+                                    toast.show();
+                                } while (cursor.moveToNext());
+                            }
+                            //delete member
+                            cursor = db2.query("MEMBERS", new String[]{"_id"},
+                                    "PROJECT_ID =?", new String[] {Long.toString(projectId)},
+                                    null, null, null);
+
+                            if(cursor.moveToFirst()) {
+                                do {
+                                    db.delete("MEMBERS",
+                                            "_id=?",
+                                            new String[]{cursor.getString(0)}
+                                    );
+                                    Toast toast = Toast.makeText(ProjectActivity.this, "Delete Success", Toast.LENGTH_LONG);
+                                    toast.show();
+                                } while (cursor.moveToNext());
+                            }
+
+                            //delete project
+                            db.delete("PROJECTS",
+                                    "_id=?",
+                                    new String[]{Long.toString(projectId)}
+                            );
+                            Toast toast = Toast.makeText(ProjectActivity.this, "Delete Success", Toast.LENGTH_LONG);
+                            toast.show();
+
+                            dialog.dismiss();
+                            Intent intent = new Intent(ProjectActivity.this, ProfileActivity.class);
+                            intent.putExtra("userId", userId);
+                            startActivity(intent);
+
+                        }
+                    })
+                    .setNegativeButton("No", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int id) {
+                            dialog.dismiss();
+                        }
+                    });
+
+            AlertDialog dialog = builderDialog.create();
+            dialog.show();
+        }catch (SQLiteException e){
+            System.out.println(e.getMessage());
+        }
     }
 
     public void addAssignedUser(View view){
@@ -68,8 +173,6 @@ public class ProjectActivity extends Activity {
         try {
             SQLiteOpenHelper scrumDoDatabaseHelper = new ScrumDoDatabaseHelper(ProjectActivity.this);
             db = scrumDoDatabaseHelper.getReadableDatabase();
-
-            final ArrayList seletedItems = new ArrayList();
             final ArrayList<String> UserList = new ArrayList<String>();
 
             cursor = db.query("MEMBERS", new String[]{"_id", "PROJECT_ID", "MEMBER_ID"},
@@ -98,32 +201,24 @@ public class ProjectActivity extends Activity {
             final CharSequence[] items = UserList.toArray(new CharSequence[UserList.size()]);
             final AlertDialog.Builder builderDialog = new AlertDialog.Builder(ProjectActivity.this);
             builderDialog.setTitle("Assign Task");
-            builderDialog.setMultiChoiceItems(items, null,
-                    new DialogInterface.OnMultiChoiceClickListener() {
+            builderDialog.setSingleChoiceItems(items, -1, new DialogInterface.OnClickListener(){
                         @Override
-                        public void onClick(DialogInterface dialog, int indexSelected,
-                                            boolean isChecked) {
-                            if (isChecked) {
-                                seletedItems.add(items[indexSelected]);
-                            } else if (seletedItems.contains(items[indexSelected])) {
-//                                seletedItems.remove(Integer.valueOf(indexSelected));
-                                seletedItems.add(items[indexSelected]);
-                            }
+                        public void onClick(DialogInterface dialog, int indexSelected){
+                            assignedname = items[indexSelected].toString();
+                            Toast.makeText(getApplicationContext(),
+                                    "The member is "+items[indexSelected], Toast.LENGTH_LONG).show();
                         }
                     })
 
                     .setPositiveButton("OK", new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialog, int id) {
-                            //deleting members to database
                             SQLiteOpenHelper scrumDoDatabaseHelper = new ScrumDoDatabaseHelper(ProjectActivity.this);
+                            SQLiteDatabase db2 = scrumDoDatabaseHelper.getReadableDatabase();
                             db = scrumDoDatabaseHelper.getWritableDatabase();
 
-                            for(int i=0; i< seletedItems.size(); i++ ){
-                                SQLiteDatabase db2 = scrumDoDatabaseHelper.getReadableDatabase();
-
                                 cursor = db2.query("USERS", new String[]{"_id", "FNAME", "LNAME", "UNAME", "PASSWORD", "IMAGE"},
-                                        "UNAME =?", new String[] {seletedItems.get(i).toString()},
+                                        "UNAME =?", new String[] {assignedname},
                                         null, null, null);
 
                                 if(cursor.moveToFirst()){
@@ -133,7 +228,7 @@ public class ProjectActivity extends Activity {
                                     dialog.dismiss();
                                 }
 
-                            }
+
 
                         }
                     })

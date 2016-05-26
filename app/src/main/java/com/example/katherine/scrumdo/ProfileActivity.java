@@ -2,6 +2,8 @@ package com.example.katherine.scrumdo;
 
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.app.NotificationManager;
+import android.app.TaskStackBuilder;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -14,6 +16,7 @@ import android.graphics.BitmapFactory;
 import android.provider.ContactsContract;
 import android.support.design.widget.FloatingActionButton;
 import android.os.Bundle;
+import android.support.v7.app.NotificationCompat;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.LayoutInflater;
@@ -67,8 +70,49 @@ public class ProfileActivity extends Activity {
         Intent intent = getIntent();
         userId = (Long) intent.getExtras().get("userId");
 
+
+        SQLiteOpenHelper scrumDoDatabaseHelper = new ScrumDoDatabaseHelper(ProfileActivity.this);
+        SQLiteDatabase db2 = scrumDoDatabaseHelper.getReadableDatabase();
+        String dateNow = new SimpleDateFormat("M-dd-yyyy").format(new Date());
+        NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(this);
+
+        //search project
+        cursor = db2.query("PROJECTS", new String[]{"_id, PROJECT_NAME"},
+                "ADMIN_ID =? AND DUE_DATE =?", new String[] {Long.toString(userId), dateNow },
+                null, null, null);
+
+        if(cursor.moveToFirst()) {
+            do {
+                mBuilder.setSmallIcon(R.drawable.images);
+                mBuilder.setContentTitle("You have a project due today!");
+                mBuilder.setContentText("You have to finish " + cursor.getString(1) + " today!");
+
+                NotificationManager mNotificationManager =
+                        (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+                mNotificationManager.notify(0, mBuilder.build());
+            } while (cursor.moveToNext());
+        }
+
+        //search task
+        cursor = db2.query("TASKS", new String[]{"_id, TASK_NAME"},
+                "ASSIGNED_USER_ID =? AND DUE_DATE =?", new String[] {Long.toString(userId), dateNow },
+                null, null, null);
+
+        if(cursor.moveToFirst()) {
+            do {
+                mBuilder.setSmallIcon(R.drawable.images);
+                mBuilder.setContentTitle("You have a task due today!");
+                mBuilder.setContentText("You have to finish " + cursor.getString(1) + " today!");
+
+                NotificationManager mNotificationManager =
+                        (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+                mNotificationManager.notify(0, mBuilder.build());
+            } while (cursor.moveToNext());
+        }
+
+
         try {
-            SQLiteOpenHelper scrumDoDatabaseHelper = new ScrumDoDatabaseHelper(this);
+            scrumDoDatabaseHelper = new ScrumDoDatabaseHelper(this);
             db = scrumDoDatabaseHelper.getReadableDatabase();
 
             cursor = db.query("USERS", new String[]{"FNAME", "LNAME", "UNAME", "PASSWORD", "IMAGE"},
@@ -77,17 +121,11 @@ public class ProfileActivity extends Activity {
                     null, null, null);
 
             if (cursor.moveToFirst()) {
-                TextView fname = (TextView) findViewById(R.id.fname);
-                TextView lname = (TextView) findViewById(R.id.lname);
-                TextView uname = (TextView) findViewById(R.id.uname);
-                TextView password = (TextView) findViewById(R.id.password);
-                ImageView profileImage = (ImageView) findViewById(R.id.profileImage);
 
-                fname.setText(cursor.getString(0));
-                lname.setText(cursor.getString(1));
+                TextView uname = (TextView) findViewById(R.id.uname);
+                ImageView profileImage = (ImageView) findViewById(R.id.profileImage);
                 uname.setText(cursor.getString(2));
                 user = cursor.getString(2);
-                password.setText(cursor.getString(3));
                 byte[] image = cursor.getBlob(4);
 
                 Bitmap userImage = getImage(image);
@@ -270,12 +308,6 @@ public class ProfileActivity extends Activity {
         }
     }
 
-//    public void onListItemClick(ListView listView, long projId){
-//        Intent intent = new Intent(ProfileActivity.this, ProjectActivity.class);
-//        intent.putExtra("projectId", projId);
-//        startActivity(intent);
-//    }
-
     // Populate the Project View.
     public void populateProjectView(){
         SQLiteOpenHelper scrumDoDatabaseHelper = new ScrumDoDatabaseHelper(this);
@@ -295,6 +327,28 @@ public class ProfileActivity extends Activity {
                 projNameList.add(cursor.getString(2));
             }while(cursor.moveToNext());
         }
+
+        cursor = db.query("MEMBERS", new String[] {"_id", "PROJECT_ID"},
+                "MEMBER_ID = ?", new String [] {Long.toString(userId)},
+                null, null, null);
+
+        if(cursor.moveToFirst()){
+            do {
+                projIdList.add(cursor.getLong(1));
+
+                Cursor cursor2 = db.query("PROJECTS", new String[] {"_id", "PROJECT_NAME"},
+                        "_id = ?", new String [] {Long.toString(cursor.getLong(1))},
+                        null, null, null);
+
+                if(cursor2.moveToFirst()){
+                    do {
+                        projNameList.add(cursor2.getString(1));
+                    }while(cursor2.moveToNext());
+                }
+
+            }while(cursor.moveToNext());
+        }
+
         ArrayAdapter<String> projectAdapter = new ArrayAdapter<String> (getBaseContext(),
                 android.R.layout.simple_list_item_1, projNameList);
 
