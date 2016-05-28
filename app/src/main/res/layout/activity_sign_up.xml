@@ -72,7 +72,10 @@
             android:text="@string/uploadBtn"
             android:id="@+id/button4"
             android:layout_weight="1"
-            android:onClick="chooseImage" />
+            android:onClick="chooseImage"
+            android:textColor="#921616"
+            android:focusableInTouchMode="false"
+            android:background="#f7c0c0" />
 
         <TextView
             android:layout_width="wrap_content"
@@ -90,5 +93,9 @@
         android:text="@string/doneBtn"
         android:id="@+id/button3"
         android:layout_gravity="center_horizontal"
-        android:onClick="doneClick" />
+        android:onClick="doneClick"
+        android:textColor="#921616"
+        android:focusableInTouchMode="false"
+        android:background="#f7c0c0"
+        android:layout_marginTop="10dp" />
 </LinearLayout>

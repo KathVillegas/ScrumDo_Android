@@ -1,5 +1,6 @@
 package com.example.katherine.scrumdo;
 
+import android.app.ActionBar;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
@@ -8,16 +9,23 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteException;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.graphics.Color;
 import android.provider.ContactsContract;
 import android.support.design.widget.FloatingActionButton;
+import android.support.v7.app.ActionBarActivity;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.util.Log;
+import android.view.DragEvent;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.Window;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.DatePicker;
@@ -40,6 +48,9 @@ public class ProjectActivity extends Activity {
     public long projectId;
     public long userId;
     public final ArrayList<Long> memberIdList = new ArrayList<Long>();
+    public final ArrayList<String> commentsList = new ArrayList<String>();
+    public final ArrayList<String> fullComments = new ArrayList<String>();
+    public final ArrayList<Long> fromUsersIdList = new ArrayList<Long>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -54,17 +65,8 @@ public class ProjectActivity extends Activity {
 
         final TextView projName = (TextView)findViewById(R.id.projectName);
         projName.setText(projectName);
-        populateTaskView();
 
-        LinearLayout toDoLinearLayout = (LinearLayout)findViewById(R.id.toDoLayoutId);
-        LinearLayout doingLinearLayout = (LinearLayout)findViewById(R.id.doingLayoutId);
-        LinearLayout doneLinearLayout = (LinearLayout)findViewById(R.id.doneLayoutId);
-        toDoLinearLayout.setOnTouchListener(new TouchListener());
-        doingLinearLayout.setOnTouchListener(new TouchListener());
-        doneLinearLayout.setOnTouchListener(new TouchListener());
-        toDoLinearLayout.setOnDragListener(new DragListener());
-        doingLinearLayout.setOnDragListener(new DragListener());
-        doneLinearLayout.setOnDragListener(new DragListener());
+        populateTaskView();
 
         SQLiteOpenHelper scrumDoDatabaseHelper = new ScrumDoDatabaseHelper(ProjectActivity.this);
         SQLiteDatabase db2 = scrumDoDatabaseHelper.getReadableDatabase();
@@ -92,8 +94,6 @@ public class ProjectActivity extends Activity {
                 }
             });
         }
-
-
     }
 
     public void deleteProject(){
@@ -111,9 +111,9 @@ public class ProjectActivity extends Activity {
 
                             //delete task
                             cursor = db2.query("TASKS", new String[]{"_id"},
-                                    "PROJECT_ID =?", new String[] {Long.toString(projectId)},
+                                    "PROJECT_ID =?", new String[]{Long.toString(projectId)},
                                     null, null, null);
-                            if(cursor.moveToFirst()) {
+                            if (cursor.moveToFirst()) {
                                 do {
                                     db.delete("TASKS",
                                             "_id=?",
@@ -125,10 +125,10 @@ public class ProjectActivity extends Activity {
                             }
                             //delete member
                             cursor = db2.query("MEMBERS", new String[]{"_id"},
-                                    "PROJECT_ID =?", new String[] {Long.toString(projectId)},
+                                    "PROJECT_ID =?", new String[]{Long.toString(projectId)},
                                     null, null, null);
 
-                            if(cursor.moveToFirst()) {
+                            if (cursor.moveToFirst()) {
                                 do {
                                     db.delete("MEMBERS",
                                             "_id=?",
@@ -167,7 +167,6 @@ public class ProjectActivity extends Activity {
             System.out.println(e.getMessage());
         }
     }
-
     public void addAssignedUser(View view){
         memberIdList.clear();
         try {
@@ -217,17 +216,16 @@ public class ProjectActivity extends Activity {
                             SQLiteDatabase db2 = scrumDoDatabaseHelper.getReadableDatabase();
                             db = scrumDoDatabaseHelper.getWritableDatabase();
 
-                                cursor = db2.query("USERS", new String[]{"_id", "FNAME", "LNAME", "UNAME", "PASSWORD", "IMAGE"},
-                                        "UNAME =?", new String[] {assignedname},
-                                        null, null, null);
+                            cursor = db2.query("USERS", new String[]{"_id", "FNAME", "LNAME", "UNAME", "PASSWORD", "IMAGE"},
+                                    "UNAME =?", new String[]{assignedname},
+                                    null, null, null);
 
-                                if(cursor.moveToFirst()){
-                                    assignedUser = cursor.getLong(0);
-                                    Toast toast = Toast.makeText(ProjectActivity.this, Long.toString(assignedUser), Toast.LENGTH_LONG);
-                                    toast.show();
-                                    dialog.dismiss();
-                                }
-
+                            if (cursor.moveToFirst()) {
+                                assignedUser = cursor.getLong(0);
+                                Toast toast = Toast.makeText(ProjectActivity.this, Long.toString(assignedUser), Toast.LENGTH_LONG);
+                                toast.show();
+                                dialog.dismiss();
+                            }
 
 
                         }
@@ -303,6 +301,7 @@ public class ProjectActivity extends Activity {
                         db = scrumDoDatabaseHelper.getWritableDatabase();
                         ScrumDoDatabaseHelper.insertTask(db, p_Id, taskName, taskDetail, taskDueDate, a_User);
                         alert.dismiss();
+                        resetLayouts();
                         populateTaskView();
                         Toast toast = Toast.makeText(ProjectActivity.this, "Success.", Toast.LENGTH_LONG);
                         toast.show();
@@ -503,8 +502,8 @@ public class ProjectActivity extends Activity {
         SQLiteOpenHelper scrumDoDatabaseHelper = new ScrumDoDatabaseHelper(this);
         db = scrumDoDatabaseHelper.getReadableDatabase();
 
-        cursor = db.query("MEMBERS", new String[] {"_id" , "PROJECT_ID", "MEMBER_ID"},
-                "PROJECT_ID = ?", new String [] {Long.toString(projectId)},
+        cursor = db.query("MEMBERS", new String[]{"_id", "PROJECT_ID", "MEMBER_ID"},
+                "PROJECT_ID = ?", new String[]{Long.toString(projectId)},
                 null, null, null);
 
 
@@ -555,75 +554,265 @@ public class ProjectActivity extends Activity {
 
     }
 
-//    REATE TABLE TASKS ("
-//                               + "_id INTEGER PRIMARY KEY AUTOINCREMENT,"
-//                               + "PROJECT_ID INTEGER,"
-//                               + "TASK_NAME TEXT,"
-//                               + "TASK_DETAILS TEXT,"
-//                               + "DUE_DATE TEXT,"
-//                               + "ASSIGNED_USER_ID INTEGER,"
-//                               + "LINK TEXT,"
-//                               + "STATUS TEXT
-
-    //populate the TASKS VIEW
+    //populate the TASKS VIEW (using textviews)
     public void populateTaskView(){
         SQLiteOpenHelper scrumDoDatabaseHelper = new ScrumDoDatabaseHelper(this);
         db = scrumDoDatabaseHelper.getReadableDatabase();
 
-        cursor = db.query("TASKS", new String[]{"_id", "PROJECT_ID", "TASK_NAME", "STATUS"},
+        LinearLayout toDoLinearLayout = (LinearLayout)findViewById(R.id.toDoLayoutId);
+        LinearLayout doingLinearLayout = (LinearLayout)findViewById(R.id.doingLayoutId);
+        LinearLayout doneLinearLayout = (LinearLayout)findViewById(R.id.doneLayoutId);
+
+        toDoLinearLayout.setOnDragListener(new DragListener());
+        doingLinearLayout.setOnDragListener(new DragListener());
+        doneLinearLayout.setOnDragListener(new DragListener());
+
+        cursor = db.query("TASKS", new String[]{"_id", "PROJECT_ID", "TASK_NAME", "TASK_DETAILS", "DUE_DATE", "ASSIGNED_USER_ID", "STATUS"},
                 "PROJECT_ID = ?", new String[]{Long.toString(projectId)},
                 null, null, null);
 
         int numberOfRows = cursor.getCount();
+
+        TextView[] textViewArray = new TextView[numberOfRows];
+
         ArrayList<Long> taskIdList = new ArrayList<Long>();
-        LinearLayout toDoLinearLayout = (LinearLayout) findViewById(R.id.toDoLayoutId);
-        LinearLayout doingLinearLayout = (LinearLayout)findViewById(R.id.doingLayoutId);
-        LinearLayout doneLinearLayout = (LinearLayout)findViewById(R.id.doneLayoutId);
 
-        TextView[] taskViewArray = new TextView[numberOfRows];
-
-        if(cursor.moveToFirst()){
+        if(cursor.moveToFirst()) {
             int i = 0;
-            do{
-                taskIdList.add(cursor.getLong(0));
+            do {
+                final int taskId = cursor.getInt(0);
+                TextView newTextView = new TextView(this);
+                final CharSequence title = cursor.getString(2);
+                newTextView.setText(title);
 
-                TextView newTaskView = new TextView(this);
-                newTaskView.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT,
-                        LinearLayout.LayoutParams.WRAP_CONTENT));
-                newTaskView.setText(cursor.getString(2));
-                newTaskView.setBackgroundColor(0xff66ff66); // hex color 0xAARRGGBB
-                newTaskView.setPadding(20, 20, 20, 20);// in pixels (left, top, right, bottom)
+                newTextView.setTextColor(Color.parseColor("#FFFFFF"));
+                LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(
+                        LinearLayout.LayoutParams.MATCH_PARENT,
+                        LinearLayout.LayoutParams.WRAP_CONTENT);
+                lp.setMargins(0, 5, 5, 0);
+                newTextView.setLayoutParams(lp);
+                newTextView.setPadding(5, 5, 5, 5);
+                newTextView.setGravity(Gravity.CENTER);
 
-                newTaskView.setOnTouchListener(new TouchListener());
-                newTaskView.setOnDragListener(new DragListener());
+                final CharSequence detail = cursor.getString(3);
+                final CharSequence dueDate = cursor.getString(4);
 
-                newTaskView.setOnClickListener(new View.OnClickListener() {
+                Cursor cursor2 = db.query("USERS", new String[]{"_id", "UNAME"},
+                        "_id = ?", new String[]{Integer.toString(cursor.getInt(5))},
+                        null, null, null);
+
+                cursor2.moveToFirst();
+                final CharSequence uname = cursor2.getString(1);
+
+
+                newTextView.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-
-
+                       viewTaskDetails(v, title.toString(), detail.toString(), dueDate.toString(), uname.toString(), taskId);
                     }
                 });
 
-                if(cursor.getString(3).equals("todo")){
-                    toDoLinearLayout.addView(newTaskView);
-                }else if(cursor.getString(3).equals("doing")){
-                    doingLinearLayout.addView(newTaskView);
-                }else if(cursor.getString(3).equals("done")){
-                    doneLinearLayout.addView(newTaskView);
+
+                if (cursor.getString(6).equals("todo")) {
+                    newTextView.setBackgroundColor(Color.parseColor("#A01D22"));
+                    toDoLinearLayout.addView(newTextView);
+                } else if (cursor.getString(6).equals("doing")) {
+                    newTextView.setBackgroundColor(Color.parseColor("#FFD526"));
+                    doingLinearLayout.addView(newTextView);
+                } else if (cursor.getString(6).equals("done")) {
+                    newTextView.setBackgroundColor(Color.parseColor("#106003"));
+                    doneLinearLayout.addView(newTextView);
                 }
 
-                taskViewArray[i] = newTaskView;
+                newTextView.setOnLongClickListener(new LongClickListener());
+
+                textViewArray[i] = newTextView;
                 i++;
-            }while(cursor.moveToNext());
-        }else{
-            TextView newTaskView = new TextView(this);
-            newTaskView.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT,
-                    LinearLayout.LayoutParams.WRAP_CONTENT));
-            newTaskView.setText("not inserted");
-            newTaskView.setBackgroundColor(0xff66ff66); // hex color 0xAARRGGBB
-            newTaskView.setPadding(20, 20, 20, 20);// in pixels (left, top, right, bottom)
-            toDoLinearLayout.addView(newTaskView);
+
+            } while (cursor.moveToNext());
         }
+    }
+
+    public void resetLayouts(){
+        LinearLayout todoLayout = (LinearLayout) findViewById(R.id.toDoLayoutId);
+        LinearLayout doingLayout = (LinearLayout) findViewById(R.id.doingLayoutId);
+        LinearLayout doneLayout = (LinearLayout) findViewById(R.id.doneLayoutId);
+
+        todoLayout.removeAllViews();
+        doingLayout.removeAllViews();
+        doneLayout.removeAllViews();
+    }
+
+    public void viewTaskDetails(View v, String title, String detail, String dueDate, String uname, final Integer taskId){
+//        LayoutInflater layoutInflater = LayoutInflater.from(ProjectActivity.this);
+
+        final AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(this);
+        LayoutInflater layoutInflater = getLayoutInflater();
+
+        View promptView = layoutInflater.inflate(R.layout.view_task, null);
+        final TextView taskDescription = (TextView) promptView.findViewById(R.id.textDetailId);
+        final TextView taskAssignedUser = (TextView) promptView.findViewById(R.id.taskAssignedContentId);
+        final TextView taskDueDate = (TextView )promptView.findViewById(R.id.dueDateContentId);
+        final EditText taskComment = (EditText) promptView.findViewById(R.id.taskCommentId);
+        final Button sendBtn = (Button) promptView.findViewById(R.id.sendBtn);
+        final Button commentBtn = (Button) promptView.findViewById(R.id.viewCommentsBtn);
+        final Button deleteBtn = (Button) promptView.findViewById(R.id.deleteBtn);
+
+        alertDialogBuilder.setView(promptView);
+        alertDialogBuilder.setTitle(title);
+
+        taskDescription.setText(detail);
+        taskDueDate.setText(dueDate);
+        taskAssignedUser.setText(uname);
+        // setup a dialog window
+        alertDialogBuilder.setCancelable(false)
+                .setPositiveButton("BACK", new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int id) {
+                    }
+                });
+
+        final AlertDialog alert = alertDialogBuilder.create();
+
+        sendBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                final String comment = taskComment.getText().toString();
+                Log.d("COMMENT LENGTH", Integer.toString(comment.length()));
+                if (comment.length() > 0) {
+                    sendComment(comment, taskId);
+                    taskComment.setText("");
+                    alert.dismiss();
+                }
+            }
+        });
+
+        commentBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                viewAllComments(taskId);
+            }
+        });
+
+        deleteBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                try {
+                    final AlertDialog.Builder builderDialog = new AlertDialog.Builder(ProjectActivity.this);
+                    builderDialog.setTitle("Delete Task");
+                    builderDialog.setMessage("Are you sure you want to delete this task?");
+                    builderDialog
+                            .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialog, int id) {
+                                    SQLiteOpenHelper scrumDoDatabaseHelper = new ScrumDoDatabaseHelper(ProjectActivity.this);
+                                    SQLiteDatabase db2 = scrumDoDatabaseHelper.getWritableDatabase();
+
+                                    //delete comments
+                                    Cursor cursor2 = db2.query("COMMENTS", new String[]{"TASK_ID"},
+                                            "TASK_ID =?", new String[]{Integer.toString(taskId)},
+                                            null, null, null);
+
+                                    if (cursor2.moveToFirst()) {
+                                        do {
+                                            db2.delete("COMMENTS",
+                                                    "TASK_ID = ?",
+                                                    new String[]{Integer.toString(cursor2.getInt(0))}
+                                            );
+
+                                        } while (cursor2.moveToNext());
+                                    }
+                                    //delete task
+                                    db2.delete("TASKS", "_id = ?", new String[]{Integer.toString(taskId)});
+                                    Toast toast = Toast.makeText(ProjectActivity.this, "Success", Toast.LENGTH_LONG);
+                                    toast.show();
+                                    resetLayouts();
+                                    populateTaskView();
+                                    dialog.dismiss();
+                                }
+                            })
+                            .setNegativeButton("No", new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialog, int id) {
+                                    dialog.dismiss();
+                                }
+                            });
+                    AlertDialog dialog = builderDialog.create();
+                    dialog.show();
+                    alert.dismiss();
+                } catch (SQLiteException e) {
+                    System.out.println(e.getMessage());
+                }
+            }
+        });
+        // create an alert dialog
+        alert.show();
+    }
+
+    public void sendComment(String comment, int taskId){
+        ScrumDoDatabaseHelper scrumDoDatabaseHelper = new ScrumDoDatabaseHelper(this);
+        db = scrumDoDatabaseHelper.getWritableDatabase();
+        ScrumDoDatabaseHelper.insertComment(db, taskId, (int) userId, comment);
+
+        Log.d("INSERT COMMENT", "SUCCESS!");
+        Toast toast = Toast.makeText(ProjectActivity.this, "Success", Toast.LENGTH_LONG);
+        toast.show();
+    }
+
+    public void viewAllComments(int taskId){
+        commentsList.clear();
+        fromUsersIdList.clear();
+        fullComments.clear();
+        LayoutInflater layoutInflater = LayoutInflater.from(ProjectActivity.this);
+        View promptView = layoutInflater.inflate(R.layout.view_comments, null);
+        AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(ProjectActivity.this);
+        alertDialogBuilder.setView(promptView);
+        alertDialogBuilder.setTitle("Comments");
+
+        SQLiteOpenHelper scrumDoDatabaseHelper = new ScrumDoDatabaseHelper(this);
+        db = scrumDoDatabaseHelper.getReadableDatabase();
+
+        cursor = db.query("COMMENTS", new String[]{"_id", "TASK_ID", "USER_ID", "COMMENT"},
+                "TASK_ID = ?", new String[]{Integer.toString(taskId)},
+                null, null, null);
+
+
+        ListView commentsListView = (ListView)promptView.findViewById(R.id.commentsListView);
+
+        if(cursor.moveToFirst()){
+            do {
+                fromUsersIdList.add(cursor.getLong(2));
+                commentsList.add(cursor.getString(3));
+            }while(cursor.moveToNext());
+        }
+
+        for(int i=0; i< fromUsersIdList.size(); i++ ){
+            db = scrumDoDatabaseHelper.getReadableDatabase();
+            Cursor cursor2 = db.query("USERS",
+                    new String[] {"_id", "UNAME"},
+                    "_id=?",
+                    new String[] {fromUsersIdList.get(i).toString()},
+                    null, null, null
+            );
+
+            cursor2.moveToFirst();
+            String fullComment = "From: "+ cursor2.getString(1) +"\n"+commentsList.get(i);
+            fullComments.add(fullComment);
+        }
+
+        ArrayAdapter<String> commentAdapter = new ArrayAdapter<String> (getBaseContext(),
+                android.R.layout.simple_list_item_1, fullComments);
+
+        commentsListView.setAdapter(commentAdapter);
+
+        alertDialogBuilder.setCancelable(true)
+                .setPositiveButton("Back", new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int id) {
+                        dialog.dismiss();
+                    }
+                });
+        // create an alert dialog
+        final AlertDialog alert = alertDialogBuilder.create();
+        alert.show();
+
     }
 }

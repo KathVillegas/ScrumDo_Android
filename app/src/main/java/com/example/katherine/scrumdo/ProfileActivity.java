@@ -47,7 +47,7 @@ public class ProfileActivity extends Activity {
     public static int month;
     public static int day;
     public static int year;
-    public  TextView password;
+    public TextView password;
     public long projId;
     public long userId;
     public String user;
