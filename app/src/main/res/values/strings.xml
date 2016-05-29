@@ -32,5 +32,6 @@
     <string name="assignMember">Assign Member</string>
     <string name="taskName">Task Name</string>
     <string name="taskDetail">Description</string>
-
+    <string name="taskAssigned">Assigned To</string>
+    <string name="addCommentHint">Add Comment</string>
 </resources>

@@ -87,7 +87,7 @@ public class ScrumDoDatabaseHelper extends SQLiteOpenHelper {
         db.insert("MEMBERS", null, memberValues);
     }
 
-    public static void insertTask(SQLiteDatabase db, int projId, String taskName,String taskDetail, String dueDate, int assignUser){
+    public static long insertTask(SQLiteDatabase db, int projId, String taskName,String taskDetail, String dueDate, int assignUser){
         ContentValues taskValues = new ContentValues();
         taskValues.put("PROJECT_ID", projId);
         taskValues.put("TASK_NAME", taskName);
@@ -95,7 +95,7 @@ public class ScrumDoDatabaseHelper extends SQLiteOpenHelper {
         taskValues.put("DUE_DATE", dueDate);
         taskValues.put("ASSIGNED_USER_ID", assignUser);
         taskValues.put("STATUS", "todo");
-        db.insert("TASKS", null, taskValues);
+        return db.insert("TASKS", null, taskValues);
     }
 
     public static void insertComment(SQLiteDatabase db, int taskId, int userId, String comment){

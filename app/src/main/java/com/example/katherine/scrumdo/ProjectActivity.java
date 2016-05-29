@@ -8,9 +8,7 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteException;
 import android.database.sqlite.SQLiteOpenHelper;
-import android.provider.ContactsContract;
 import android.support.design.widget.FloatingActionButton;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -38,6 +36,7 @@ public class ProjectActivity extends Activity {
     public String assignedname;
     public long projectId;
     public long userId;
+    public long taskId;
     public final ArrayList<Long> memberIdList = new ArrayList<Long>();
 
     @Override
@@ -206,17 +205,16 @@ public class ProjectActivity extends Activity {
                             SQLiteDatabase db2 = scrumDoDatabaseHelper.getReadableDatabase();
                             db = scrumDoDatabaseHelper.getWritableDatabase();
 
-                                cursor = db2.query("USERS", new String[]{"_id", "FNAME", "LNAME", "UNAME", "PASSWORD", "IMAGE"},
-                                        "UNAME =?", new String[] {assignedname},
-                                        null, null, null);
+                            cursor = db2.query("USERS", new String[]{"_id", "FNAME", "LNAME", "UNAME", "PASSWORD", "IMAGE"},
+                                    "UNAME =?", new String[]{assignedname},
+                                    null, null, null);
 
-                                if(cursor.moveToFirst()){
-                                    assignedUser = cursor.getLong(0);
-                                    Toast toast = Toast.makeText(ProjectActivity.this, Long.toString(assignedUser), Toast.LENGTH_LONG);
-                                    toast.show();
-                                    dialog.dismiss();
-                                }
-
+                            if (cursor.moveToFirst()) {
+                                assignedUser = cursor.getLong(0);
+                                Toast toast = Toast.makeText(ProjectActivity.this, Long.toString(assignedUser), Toast.LENGTH_LONG);
+                                toast.show();
+                                dialog.dismiss();
+                            }
 
 
                         }
@@ -290,10 +288,11 @@ public class ProjectActivity extends Activity {
                     try {
                         SQLiteOpenHelper scrumDoDatabaseHelper = new ScrumDoDatabaseHelper(ProjectActivity.this);
                         db = scrumDoDatabaseHelper.getWritableDatabase();
-                        ScrumDoDatabaseHelper.insertTask(db, p_Id, taskName, taskDetail, taskDueDate, a_User);
+                        taskId = ScrumDoDatabaseHelper.insertTask(db, p_Id, taskName, taskDetail, taskDueDate, a_User);
                         alert.dismiss();
                         Toast toast = Toast.makeText(ProjectActivity.this, "Success.", Toast.LENGTH_LONG);
                         toast.show();
+                        showTaskDetails();
                     } catch (SQLiteException e){}
 
                 }
@@ -320,6 +319,51 @@ public class ProjectActivity extends Activity {
             @Override
             public void afterTextChanged(Editable s) {}
         });
+    }
+    public void showTaskDetails(){
+        SQLiteOpenHelper scrumDoDatabaseHelper = new ScrumDoDatabaseHelper(ProjectActivity.this);
+        SQLiteDatabase db2 = scrumDoDatabaseHelper.getReadableDatabase();
+
+        cursor = db2.query("TASKS", new String[]{"_id", "TASK_NAME", "TASK_DETAILS", "DUE_DATE", "ASSIGNED_USER_ID"},
+                "_id =?", new String[] {Long.toString(taskId)},
+                null, null, null);
+
+        LayoutInflater layoutInflater = LayoutInflater.from(ProjectActivity.this);
+        View promptView = layoutInflater.inflate(R.layout.view_task, null);
+        AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(ProjectActivity.this);
+        alertDialogBuilder.setView(promptView);
+//        if(cursor.moveToFirst()){
+//            alertDialogBuilder.setTitle(cursor.getString(1));
+//
+//            TextView details = (TextView)findViewById(R.id.detailsPlace);
+//            TextView assigned = (TextView)findViewById(R.id.assignedTask);
+//            TextView duedate = (TextView)findViewById(R.id.dueDatePlace);
+//
+//            details.setText(cursor.getString(2));
+//            duedate.setText(cursor.getString(3));
+//
+//            Cursor cursor2 = db2.query("USERS", new String[]{"_id", "UNAME"},
+//                    "_id =?", new String[] {cursor.getString(4)},
+//                    null, null, null);
+//
+//            if(cursor2.moveToFirst()){
+//                assigned.setText(cursor2.getString(1));
+//            }
+            alertDialogBuilder.setCancelable(true)
+                    .setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int id) {
+                            dialog.dismiss();
+                        }
+                    });
+
+            // create an alert dialog
+            final AlertDialog alert = alertDialogBuilder.create();
+            alert.show();
+
+
+//        }
+
+
     }
     public void addMember(){
 
@@ -542,17 +586,6 @@ public class ProjectActivity extends Activity {
         alert.show();
 
     }
-
-//    REATE TABLE TASKS ("
-//                               + "_id INTEGER PRIMARY KEY AUTOINCREMENT,"
-//                               + "PROJECT_ID INTEGER,"
-//                               + "TASK_NAME TEXT,"
-//                               + "TASK_DETAILS TEXT,"
-//                               + "DUE_DATE TEXT,"
-//                               + "ASSIGNED_USER_ID INTEGER,"
-//                               + "LINK TEXT,"
-//                               + "STATUS TEXT
-
     //populate the TASKS VIEW
     public void populateTaskView(){
         SQLiteOpenHelper scrumDoDatabaseHelper = new ScrumDoDatabaseHelper(this);
