@@ -306,7 +306,6 @@ public class ProjectActivity extends Activity {
                         populateTaskView();
                         Toast toast = Toast.makeText(ProjectActivity.this, "Success.", Toast.LENGTH_LONG);
                         toast.show();
-                        showTaskDetails();
                     } catch (SQLiteException e){}
 
                 }
@@ -333,51 +332,6 @@ public class ProjectActivity extends Activity {
             @Override
             public void afterTextChanged(Editable s) {}
         });
-    }
-    public void showTaskDetails(){
-        SQLiteOpenHelper scrumDoDatabaseHelper = new ScrumDoDatabaseHelper(ProjectActivity.this);
-        SQLiteDatabase db2 = scrumDoDatabaseHelper.getReadableDatabase();
-
-        cursor = db2.query("TASKS", new String[]{"_id", "TASK_NAME", "TASK_DETAILS", "DUE_DATE", "ASSIGNED_USER_ID"},
-                "_id =?", new String[] {Long.toString(taskId)},
-                null, null, null);
-
-        LayoutInflater layoutInflater = LayoutInflater.from(ProjectActivity.this);
-        View promptView = layoutInflater.inflate(R.layout.view_task, null);
-        AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(ProjectActivity.this);
-        alertDialogBuilder.setView(promptView);
-//        if(cursor.moveToFirst()){
-//            alertDialogBuilder.setTitle(cursor.getString(1));
-//
-//            TextView details = (TextView)findViewById(R.id.detailsPlace);
-//            TextView assigned = (TextView)findViewById(R.id.assignedTask);
-//            TextView duedate = (TextView)findViewById(R.id.dueDatePlace);
-//
-//            details.setText(cursor.getString(2));
-//            duedate.setText(cursor.getString(3));
-//
-//            Cursor cursor2 = db2.query("USERS", new String[]{"_id", "UNAME"},
-//                    "_id =?", new String[] {cursor.getString(4)},
-//                    null, null, null);
-//
-//            if(cursor2.moveToFirst()){
-//                assigned.setText(cursor2.getString(1));
-//            }
-            alertDialogBuilder.setCancelable(true)
-                    .setPositiveButton("OK", new DialogInterface.OnClickListener() {
-                        public void onClick(DialogInterface dialog, int id) {
-                            dialog.dismiss();
-                        }
-                    });
-
-            // create an alert dialog
-            final AlertDialog alert = alertDialogBuilder.create();
-            alert.show();
-
-
-//        }
-
-
     }
     public void addMember(){
 
