@@ -41,5 +41,6 @@
     <string name="deleteTask">Delete Task</string>
 
     <string name="back">Back</string>
+    <string name="linkHint">Link</string>
 
 </resources>
