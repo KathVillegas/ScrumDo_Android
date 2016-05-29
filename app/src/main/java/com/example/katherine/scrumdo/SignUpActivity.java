@@ -2,6 +2,7 @@ package com.example.katherine.scrumdo;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteException;
 import android.database.sqlite.SQLiteOpenHelper;
@@ -15,9 +16,11 @@ import android.text.TextWatcher;
 import android.view.View;
 import android.view.Window;
 import android.widget.EditText;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 
@@ -25,6 +28,7 @@ public class SignUpActivity extends Activity {
     public static final int GET_FROM_GALLERY = 3;
     public static Bitmap bitmap = null;
     private SQLiteDatabase db;
+    public static String imageFile;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -51,6 +55,12 @@ public class SignUpActivity extends Activity {
 
             try {
                 bitmap = MediaStore.Images.Media.getBitmap(this.getContentResolver(), selectedImage);
+                //getting the filename
+                Uri selectedImageURI = data.getData();
+                imageFile = getRealPathFromURI(selectedImageURI);
+                imageFile = imageFile.substring(imageFile.lastIndexOf("/")+1);
+                TextView imageName = (TextView) findViewById(R.id.textView);
+                imageName.setText(imageFile);
 
             } catch (FileNotFoundException e) {
                 // TODO Auto-generated catch block
@@ -60,6 +70,20 @@ public class SignUpActivity extends Activity {
                 e.printStackTrace();
             }
         }
+    }
+
+    private String getRealPathFromURI(Uri contentURI) {
+        String result;
+        Cursor cursor = getContentResolver().query(contentURI, null, null, null, null);
+        if (cursor == null) { // Source is Dropbox or other similar local file path
+            result = contentURI.getPath();
+        } else {
+            cursor.moveToFirst();
+            int idx = cursor.getColumnIndex(MediaStore.Images.ImageColumns.DATA);
+            result = cursor.getString(idx);
+            cursor.close();
+        }
+        return result;
     }
 
     // convert from bitmap to byte array

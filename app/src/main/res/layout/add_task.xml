@@ -38,10 +38,13 @@
         android:layout_gravity="center_horizontal" />
 
     <Button
-        android:layout_width="wrap_content"
+        android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:text="@string/assignMember"
         android:id="@+id/assignMember"
         android:layout_gravity="center_horizontal"
-        android:onClick="addAssignedUser" />
+        android:onClick="addAssignedUser"
+        android:background="#f7c0c0"
+        android:layout_margin="10dp"
+        android:textColor="#921616" />
 </LinearLayout>

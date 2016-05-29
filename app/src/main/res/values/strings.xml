@@ -31,7 +31,15 @@
 
     <string name="assignMember">Assign Member</string>
     <string name="taskName">Task Name</string>
-    <string name="taskDetail">Description</string>
-    <string name="taskAssigned">Assigned To</string>
-    <string name="addCommentHint">Add Comment</string>
+    <string name="taskDetail">Description: </string>
+    <string name="assignedMember">Assigned To: </string>
+    <string name="dueDate">Due Date: </string>
+
+    <string name="viewAllComments">View Comments</string>
+    <string name="sendComment">Send</string>
+    <string name="commentHere">Comment</string>
+    <string name="deleteTask">Delete Task</string>
+
+    <string name="back">Back</string>
+
 </resources>

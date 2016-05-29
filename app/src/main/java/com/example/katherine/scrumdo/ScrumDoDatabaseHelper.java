@@ -106,6 +106,11 @@ public class ScrumDoDatabaseHelper extends SQLiteOpenHelper {
         db.insert("COMMENTS", null, taskValues);
     }
 
+    public static void updateTaskStatus(SQLiteDatabase db, String taskName, String newStatus){
+        ContentValues tasksStatus = new ContentValues();
+        tasksStatus.put("STATUS", newStatus);
+        db.update("TASKS",tasksStatus,"TASK_NAME = ? ", new String[]{taskName});
+    }
 
 
     @Override
